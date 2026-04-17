@@ -7,7 +7,7 @@ import { VARIABLES, SEPARATORS, DUMMY_DATA } from './constants';
 import { Palette } from './components/Palette';
 import { MarquillaConfig } from './components/MarquillaConfig';
 import { PreviewPanel } from './components/PreviewPanel';
-import { Upload, Download, RefreshCw, Save, FolderOpen, X, DownloadCloud, Trash2 } from 'lucide-react';
+import { Upload, Download, RefreshCw, Save, FolderOpen, X, DownloadCloud, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SavedStructure {
   id: string;
@@ -106,6 +106,28 @@ export default function App() {
     const updated = savedStructures.filter(s => s.id !== id);
     setSavedStructures(updated);
     localStorage.setItem('marquillas_saved', JSON.stringify(updated));
+  };
+
+  const handleCopyM1toM2 = () => {
+    setMarquillas(prev => {
+      const m1 = prev[0];
+      const m2 = prev[1];
+
+      // helper to deep copy blocks and assign new instanceIds
+      const copyBlocks = (blocks: BlockInstance[]) =>
+        blocks.map(b => ({ ...b, instanceId: `inst-${generateId()}` }));
+
+      const newM2Lines = [
+        { ...m2.lines[0], blocks: copyBlocks(m1.lines[0].blocks) }, // Line 1 = Line 1
+        { ...m2.lines[1], blocks: copyBlocks(m1.lines[2].blocks) }, // Line 2 = Line 3
+        { ...m2.lines[2], blocks: copyBlocks(m1.lines[1].blocks) }, // Line 3 = Line 2
+      ];
+
+      const newState = [...prev];
+      newState[1] = { ...m2, lines: newM2Lines };
+      return newState;
+    });
+    showNotice("Marquilla 2 generada a partir de Marquilla 1 (invertida)");
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -466,37 +488,37 @@ export default function App() {
       
       {/* GLOBAL TOAST NOTIFICATION */}
       {notification && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[70] bg-[var(--color-ink)] text-white px-6 py-3 font-bold uppercase tracking-widest text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)] animate-bounce border-2 border-white">
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[70] bg-[var(--color-ink)] text-white px-6 py-3 font-medium rounded-full shadow-lg animate-in fade-in slide-in-from-top-4">
           {notification}
         </div>
       )}
 
       {/* SAVED STRUCTURES VIEWER MODAL */}
       {showSavedViewer && (
-        <div className="absolute inset-0 z-[60] bg-[var(--color-canvas)]/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border-4 border-[var(--color-ink)] p-8 shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] w-full max-w-2xl max-h-[80vh] flex flex-col transform transition-transform animate-in zoom-in-95">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-black uppercase tracking-tight">Estructuras Guardadas</h2>
-              <button className="btn-brutal p-2 hover:bg-red-100" onClick={() => setShowSavedViewer(false)}>
-                <X className="w-6 h-6" />
+        <div className="absolute inset-0 z-[60] bg-gray-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col transform transition-transform animate-in zoom-in-95">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+              <h2 className="text-xl font-bold tracking-tight">Estructuras Guardadas</h2>
+              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors" onClick={() => setShowSavedViewer(false)}>
+                <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {savedStructures.length === 0 ? (
-                <p className="text-gray-500 font-bold text-center py-8">No hay estructuras guardadas aún.</p>
+                <p className="text-gray-500 text-center py-8">No hay estructuras guardadas aún.</p>
               ) : (
                 savedStructures.map(s => (
-                  <div key={s.id} className="border-2 border-[var(--color-ink)] p-4 flex justify-between items-center bg-[var(--color-block-a)]">
+                  <div key={s.id} className="border border-gray-200 rounded-xl p-4 flex justify-between items-center bg-gray-50/50">
                     <div>
-                      <p className="font-bold text-lg">Estructura Personalizada</p>
-                      <p className="text-xs font-mono font-bold text-gray-700 bg-white inline-block px-1 mt-1 border border-black">{s.date}</p>
+                      <p className="font-semibold text-gray-900">Estructura Personalizada</p>
+                      <p className="text-xs text-gray-500 mt-1">{s.date}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button className="btn-brutal bg-white p-2 hover:bg-green-100 text-green-700" title="Cargar al lienzo" onClick={() => handleLoadStructure(s.data)}>
-                        <DownloadCloud className="w-5 h-5" />
+                      <button className="btn-modern bg-white text-green-600 hover:bg-green-50 hover:border-green-200" title="Cargar al lienzo" onClick={() => handleLoadStructure(s.data)}>
+                        <DownloadCloud className="w-4 h-4" />
                       </button>
-                      <button className="btn-brutal bg-white p-2 hover:bg-red-100 text-red-600" title="Eliminar" onClick={() => handleDeleteSaved(s.id)}>
-                        <Trash2 className="w-5 h-5" />
+                      <button className="btn-modern bg-white text-red-600 hover:bg-red-50 hover:border-red-200" title="Eliminar" onClick={() => handleDeleteSaved(s.id)}>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -507,31 +529,31 @@ export default function App() {
         </div>
       )}
 
-      <header className="h-[70px] bg-white border-b-2 border-[var(--color-ink)] px-10 flex items-center justify-between z-20 shrink-0 overflow-x-auto gap-4">
-        <div className="text-2xl font-black tracking-tighter uppercase flex items-center whitespace-nowrap">
+      <header className="h-[70px] bg-white border-b border-gray-200 px-8 flex items-center justify-between z-20 shrink-0 overflow-x-auto gap-4 shadow-sm">
+        <div className="text-xl font-bold tracking-tight flex items-center whitespace-nowrap text-gray-900">
           Logic.Marquillas
-          <span className="text-[10px] px-2 py-0.5 bg-[var(--color-ink)] text-white rounded-full align-middle ml-3 tracking-normal">V2.0</span>
+          <span className="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full align-middle ml-3 font-semibold">V2.0</span>
         </div>
         <div className="flex gap-3">
-          <button className="btn-brutal flex items-center gap-2 bg-[#ffcaca] hover:bg-[#ffb0b0]" onClick={handleReset} title="Limpiar lienzo de estructuras">
+          <button className="btn-modern text-red-600 hover:bg-red-50 hover:border-red-200" onClick={handleReset} title="Limpiar lienzo de estructuras">
              <RefreshCw className="w-4 h-4 hidden sm:block" /> Limpiar
           </button>
 
-          <label className="btn-brutal flex items-center gap-2 cursor-pointer bg-[var(--color-block-a)] hover:bg-[#c1d1c4]">
+          <label className="btn-modern cursor-pointer">
              <Upload className="w-4 h-4 hidden sm:block" /> Importar Excel
              <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
           </label>
-          <button className="btn-brutal flex items-center gap-2 bg-[var(--color-block-b)] hover:bg-[#d6b8ba]" onClick={handleExport}>
+          <button className="btn-modern" onClick={handleExport}>
             <Download className="w-4 h-4 hidden sm:block" /> Exportar Resultado
           </button>
           
-          <div className="w-0.5 h-auto bg-[var(--color-ink)]/10 mx-1"></div>
+          <div className="w-px h-6 bg-gray-200 mx-2 self-center"></div>
           
-          <button className="btn-brutal flex items-center gap-2 bg-[#fdf2b3] hover:bg-[#fce98a]" onClick={() => setShowSavedViewer(true)}>
+          <button className="btn-modern" onClick={() => setShowSavedViewer(true)}>
             <FolderOpen className="w-4 h-4 hidden sm:block" /> Historial
           </button>
 
-          <button className="btn-brutal btn-brutal-primary flex items-center gap-2" onClick={handleSaveStructure}>
+          <button className="btn-modern btn-modern-primary" onClick={handleSaveStructure}>
             <Save className="w-4 h-4 hidden sm:block" /> Guardar
           </button>
         </div>
@@ -542,17 +564,17 @@ export default function App() {
           
           {/* OVERLAY BLOQUEANTE: PASO 1 (IMPORTAR) */}
           {excelData.length === 0 && (
-            <div className="absolute inset-0 z-50 bg-[var(--color-canvas)]/60 backdrop-blur-sm flex items-center justify-center">
-              <div className="bg-[var(--color-block-a)] border-4 border-[var(--color-ink)] p-12 text-center shadow-[12px_12px_0px_0px_rgba(26,26,26,1)] max-w-2xl transform transition-transform hover:-translate-y-1">
-                <div className="bg-white border-2 border-[var(--color-ink)] inline-block p-4 mb-6 shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] rotate-3">
-                  <Upload className="w-12 h-12 text-[var(--color-ink)]" />
+            <div className="absolute inset-0 z-50 bg-gray-900/30 backdrop-blur-md flex items-center justify-center">
+              <div className="bg-white rounded-2xl p-12 text-center shadow-2xl max-w-lg transform transition-transform hover:-translate-y-1 modern-border">
+                <div className="bg-blue-50 text-blue-600 rounded-2xl inline-flex p-5 mb-6">
+                  <Upload className="w-10 h-10" />
                 </div>
-                <h2 className="text-4xl font-black uppercase mb-4 tracking-tight">Paso 1: Sube tu Excel</h2>
-                <p className="font-bold text-gray-800 mb-8 text-lg">
-                  Para extraer las variables de las columnas y armar la estructura visual de las marquillas, debes importar tu archivo base obligatorio.
+                <h2 className="text-2xl font-bold mb-3 text-gray-900">Paso 1: Sube tu Excel</h2>
+                <p className="text-gray-500 mb-8 leading-relaxed">
+                  Para extraer las variables de las columnas y armar la estructura visual de las marquillas, debes importar tu archivo base.
                 </p>
-                <label className="btn-brutal inline-flex items-center gap-3 cursor-pointer bg-white hover:bg-gray-50 text-xl py-4 px-8 shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] hover:shadow-[2px_2px_0px_0px_rgba(26,26,26,1)] hover:translate-y-1 hover:translate-x-1 transition-all">
-                  <Upload className="w-6 h-6" /> Importar Archivo
+                <label className="btn-modern btn-modern-primary text-base py-3 px-6 cursor-pointer">
+                  Importar Archivo
                   <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
                 </label>
               </div>
@@ -560,43 +582,22 @@ export default function App() {
           )}
 
           {/* Sidebar */}
-          <div className="w-[300px] border-r-2 border-[var(--color-ink)] bg-white overflow-y-auto flex-shrink-0 z-10">
+          <div className="w-[300px] border-r border-gray-200 bg-white overflow-y-auto flex-shrink-0 z-10 shadow-sm">
             <Palette globalSeparator={globalSeparator} setGlobalSeparator={setGlobalSeparator} variables={dynamicVariables} />
           </div>
 
           {/* Main Area */}
-          <div className="flex-1 overflow-y-auto canvas-pattern p-10 flex flex-col items-center gap-16 pb-20">
+          <div className="flex-1 overflow-y-auto canvas-pattern p-10 flex flex-col items-center gap-10 pb-32">
             
-            {excelData.length > 0 && (
-              <div className="bg-[var(--color-ink)] text-white px-6 py-3 font-mono text-sm flex items-center justify-between w-full max-w-[1000px] border-2 border-white shadow-[6px_6px_0px_0px_rgba(26,26,26,1)] z-10 sticky top-0">
-                <span className="font-bold uppercase tracking-wider">Fila {previewRowIndex + 1} de {excelData.length} en Excel</span>
-                <div className="flex gap-4">
-                  <button 
-                    className="px-4 py-1 bg-white text-black font-black uppercase tracking-wider disabled:opacity-50 hover:bg-gray-200 border-2 border-[var(--color-ink)] shadow-[2px_2px_0px_0px_rgba(255,255,255,0.5)] active:shadow-none active:translate-y-[2px] active:translate-x-[2px]"
-                    onClick={() => setPreviewRowIndex(prev => Math.max(0, prev - 1))}
-                    disabled={previewRowIndex === 0}
-                  >
-                    Anterior
-                  </button>
-                  <button 
-                    className="px-4 py-1 bg-white text-black font-black uppercase tracking-wider disabled:opacity-50 hover:bg-gray-200 border-2 border-[var(--color-ink)] shadow-[2px_2px_0px_0px_rgba(255,255,255,0.5)] active:shadow-none active:translate-y-[2px] active:translate-x-[2px]"
-                    onClick={() => setPreviewRowIndex(prev => Math.min(excelData.length - 1, prev + 1))}
-                    disabled={previewRowIndex === excelData.length - 1}
-                  >
-                    Siguiente
-                  </button>
-                </div>
-              </div>
-            )}
-
             {marquillas.map((marquilla) => (
-              <div key={marquilla.id} className="w-full max-w-[1000px] flex gap-10">
+              <div key={marquilla.id} className="w-full max-w-[1000px] flex gap-8">
                 {/* Structure Editor */}
                 <div className="flex-1 min-w-0">
                   <MarquillaConfig 
                     marquilla={marquilla} 
                     onRemoveBlock={removeBlock} 
                     onUpdateBlockHeader={updateBlockHeader}
+                    onCopyM1toM2={marquilla.id === 'marquilla-2' ? handleCopyM1toM2 : undefined}
                   />
                 </div>
                 
@@ -608,19 +609,44 @@ export default function App() {
             ))}
           </div>
 
+          {/* PAGINADOR FIJO INFERIOR */}
+          {excelData.length > 0 && (
+            <div className="absolute bottom-8 left-[calc(50%+150px)] -translate-x-1/2 z-50 pointer-events-none">
+              <div className="bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-full modern-border shadow-md flex items-center gap-6 pointer-events-auto">
+                <span className="font-semibold text-sm text-gray-700">Fila {previewRowIndex + 1} de {excelData.length} en Excel</span>
+                <div className="flex gap-2">
+                  <button 
+                    className="px-4 py-1.5 text-sm font-semibold text-gray-800 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-30 shadow-sm"
+                    onClick={() => setPreviewRowIndex(prev => Math.max(0, prev - 1))}
+                    disabled={previewRowIndex === 0}
+                  >
+                    Anterior
+                  </button>
+                  <button 
+                    className="px-4 py-1.5 text-sm font-semibold text-gray-800 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-30 shadow-sm"
+                    onClick={() => setPreviewRowIndex(prev => Math.min(excelData.length - 1, prev + 1))}
+                    disabled={previewRowIndex === excelData.length - 1}
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ALERTA FLOTANTE: PASO 2 (EXPORTAR) */}
           {excelData.length > 0 && (
-            <div className="absolute bottom-10 right-10 z-50 animate-bounce">
-              <div className="bg-[var(--color-block-b)] border-4 border-[var(--color-ink)] p-5 shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] flex items-center gap-6">
+            <div className="absolute bottom-8 right-8 z-50 animate-in slide-in-from-bottom-5">
+              <div className="bg-white rounded-2xl modern-border modern-shadow p-5 flex items-center gap-6">
                 <div className="text-left">
-                  <span className="bg-white text-[var(--color-ink)] text-[11px] font-black px-2 py-1 uppercase tracking-widest border-2 border-[var(--color-ink)] block w-fit mb-2 shadow-[2px_2px_0px_0px_rgba(26,26,26,1)]">Paso 2</span>
-                  <p className="font-bold text-base uppercase tracking-tight text-[var(--color-ink)]">¿Estructura Lista?</p>
+                  <span className="text-blue-600 bg-blue-50 text-[10px] font-bold px-2 py-1 uppercase tracking-wider rounded-md block w-fit mb-1">Paso 2</span>
+                  <p className="font-bold text-gray-900">¿Estructura Lista?</p>
                 </div>
                 <button 
-                  className="btn-brutal bg-white hover:bg-gray-50 flex items-center gap-2 py-3 px-5 text-[var(--color-ink)] shadow-[4px_4px_0px_0px_rgba(26,26,26,1)] hover:shadow-[0px_0px_0px_0px_rgba(26,26,26,1)] hover:translate-y-1 hover:translate-x-1 transition-all" 
+                  className="btn-modern btn-modern-primary py-2.5 px-5" 
                   onClick={handleExport}
                 >
-                  <Download className="w-5 h-5" /> Exportar Ahora
+                  <Download className="w-4 h-4" /> Exportar Ahora
                 </button>
               </div>
             </div>
