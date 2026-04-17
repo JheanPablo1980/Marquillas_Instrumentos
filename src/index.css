@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #1A1A1A;
+  --color-canvas: #F7F5F2;
+  --color-primary: #3A6EA5;
+  --color-block-var: #DCE7E9;
+  --color-block-sep: #E9DCDD;
+  --color-block-header: #D9E9DC;
+  
+  --font-family-sans: 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-family-sans);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.canvas-pattern {
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(rgba(0, 0, 0, 0.15) 1.5px, transparent 1.5px);
+  background-size: 30px 30px;
+}
+
+.brutalist-border {
+  border: 2px solid var(--color-ink);
+}
+
+.brutalist-shadow {
+  box-shadow: 12px 12px 0px rgba(0,0,0,0.05);
+}
+
+.btn-brutal {
+  padding: 10px 20px;
+  border: 2px solid var(--color-ink);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-brutal:hover {
+  background: var(--color-ink);
+  color: white;
+}
+
+.btn-brutal-primary {
+  background: var(--color-ink);
+  color: #fff;
+}
+
+.btn-brutal-primary:hover {
+  background: #333;
+}
